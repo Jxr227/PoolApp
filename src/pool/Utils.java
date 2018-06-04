@@ -1,4 +1,4 @@
-package sample;
+package pool;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
