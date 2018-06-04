@@ -59,7 +59,7 @@ public final class Utils
     }
 
     /**
-     * Support for the {@link mat2image()} method
+     * Support for the {@link ()} method
      *
      * @param original
      *            the {@link Mat} object in BGR or grayscale

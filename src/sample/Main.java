@@ -12,10 +12,8 @@ import org.opencv.core.Core;
 public class Main extends Application {
 
     @Override
-    public void start(Stage primaryStage)
-    {
-        try
-        {
+    public void start(Stage primaryStage) {
+        try {
             // load the FXML resource
             FXMLLoader loader = new FXMLLoader(getClass().getResource("Sliders.fxml"));
             // store the root element so that the controllers can use it
@@ -24,9 +22,6 @@ public class Main extends Application {
             root.setStyle("-fx-background-color: whitesmoke;");
             // create and style a scene
             Scene scene = new Scene(root, 800, 600);
-//            scene.getStylesheets().add(getClass().getResource("application.css").toExternalForm());
-            // create the stage with the given title and the previously created
-            // scene
             primaryStage.setTitle("Object Recognition");
             primaryStage.setScene(scene);
             // show the GUI
