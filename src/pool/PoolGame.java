@@ -59,7 +59,9 @@ public class PoolGame {
                 }
             } else {
                 hasFouled = true;
-                oppositePlayer(getTurn()).incScore();
+                if(ball.equals(oppositePlayer(getTurn()).getBallType())){
+                    oppositePlayer(getTurn()).incScore();
+                }
             }
         }
         nextTurn(hasFouled);
