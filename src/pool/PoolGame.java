@@ -16,60 +16,66 @@ package pool;/*
 
 import java.util.*;
 
-import static pool.PoolGame.BallTypes.REDS;
-import static pool.PoolGame.BallTypes.YELLOWS;
-
 public class PoolGame {
     private Deque<PoolPlayer> turns;
     private PoolPlayer player1;
     private PoolPlayer player2;
 
     public PoolGame(PoolPlayer player1, PoolPlayer player2) {
+        this.player1 = player1;
+        this.player2 = player2;
+        turns = new ArrayDeque<>();
         turns.push(player1);
         turns.push(player2);
     }
 
-    public PoolPlayer nextTurn(){
+    public PoolPlayer nextTurn(boolean wasFoul) {
         PoolPlayer curr = turns.pollFirst();
+        if (wasFoul) {
+            turns.removeFirstOccurrence(curr);
+            turns.offerFirst(oppositePlayer(curr));
+        }
         turns.offerLast(curr);
         return turns.peek();
     }
 
-    public PoolPlayer getTurn(){
+    public PoolPlayer getTurn() {
         return turns.peekFirst();
     }
 
-    public void turn(ArrayList<BallTypes> ballsPotted){
-        for(BallTypes ball: ballsPotted){
-            if(getTurn().getBallType() == null){
+    public void turn(ArrayList<BallTypes> ballsPotted) {
+        boolean hasFouled = false;
+        for (BallTypes ball : ballsPotted) {
+            if (getTurn().getBallType() == null) {
+                setBallTypes(getTurn(), ball);
+            }
 
+            if (getTurn().getBallType().equals(ball)) {
+                getTurn().incScore();
+            } else {
+                hasFouled = true;
+                oppositePlayer(getTurn()).incScore();
             }
         }
-
+        nextTurn(hasFouled);
     }
 
-    private void calcBallTypes(PoolPlayer currPlayer, BallTypes pottedBall){
+    private void setBallTypes(PoolPlayer currPlayer, BallTypes pottedBall) {
         BallTypes opponentsBall = pottedBall.getOpposite();
-        if(currPlayer.equals(player1)){
+        if (currPlayer.equals(player1)) {
             setBallTypes(pottedBall, pottedBall.getOpposite());
-        } else {
+        } else if (currPlayer.equals(player2)) {
             setBallTypes(pottedBall.getOpposite(), pottedBall);
         }
     }
 
-    private void setBallTypes(BallTypes player1BallType, BallTypes player2BallType){
+    private void setBallTypes(BallTypes player1BallType, BallTypes player2BallType) {
         player1.setMyBallType(player1BallType);
         player2.setMyBallType(player2BallType);
     }
 
-    private void foul(){
-        PoolPlayer curr = turns.pollFirst();
-        /*
-            In case the player had an extra turn before fouling - This player should never have
-            more than the head followed by one more move
-         */
-        turns.removeFirstOccurrence(curr);
-        turns.offerLast(curr);
+    private PoolPlayer oppositePlayer(PoolPlayer player) {
+        return player == player1 ? player2 : player1;
     }
 
     public enum BallTypes {
