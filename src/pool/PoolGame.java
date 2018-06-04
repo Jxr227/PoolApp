@@ -49,9 +49,14 @@ public class PoolGame {
             if (getTurn().getBallType() == null) {
                 setBallTypes(getTurn(), ball);
             }
-
             if (getTurn().getBallType().equals(ball)) {
                 getTurn().incScore();
+            } else if(ball.equals(BallTypes.BLACK)) {
+                if(getTurn().getScore() == 8){
+                    //WINNER
+                } else {
+                    //LOSER
+                }
             } else {
                 hasFouled = true;
                 oppositePlayer(getTurn()).incScore();
@@ -79,7 +84,7 @@ public class PoolGame {
     }
 
     public enum BallTypes {
-        YELLOWS, REDS;
+        YELLOWS, REDS, BLACK, WHITE;
 
         private BallTypes opposite;
 
