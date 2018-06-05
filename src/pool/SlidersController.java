@@ -1,16 +1,17 @@
 package pool;
 
+
+import java.awt.image.BufferedImage;
+import java.awt.image.DataBufferByte;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.opencv.core.Core;
-import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
-import org.opencv.core.Scalar;
-import org.opencv.core.Size;
+import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import javafx.beans.property.ObjectProperty;
@@ -21,6 +22,8 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+
+import javax.imageio.ImageIO;
 
 /**
  * Controller for the sliders view
@@ -61,11 +64,16 @@ public class SlidersController {
 
     // the OpenCV object that performs the video capture
     private VideoCapture capture = new VideoCapture();
+
+
     // a flag to change the button behavior
     private boolean cameraActive;
 
     // property for object binding
     private ObjectProperty<String> hsvValuesProp;
+
+
+    private Mat image = null;
 
     /**
      * Start camera action
@@ -74,6 +82,19 @@ public class SlidersController {
     private void startCamera() {
         // bind a text property with the string containing the current range of
         // HSV values for object detection
+        BufferedImage img = null;
+        try {
+            img = ImageIO.read(new File("res/pool.jpg"));
+        } catch (IOException e) {
+            System.out.println("EX");
+        }
+        byte[] pixels = ((DataBufferByte) img.getRaster().getDataBuffer())
+                .getData();
+        image = new Mat(img.getHeight(), img.getWidth(), CvType.CV_8UC3);
+        image.put(0, 0, pixels);
+
+        updateImageView(originalFrame, Utils.mat2Image(image));
+
         hsvValuesProp = new SimpleObjectProperty<>();
         this.hsvCurrentValues.textProperty().bind(hsvValuesProp);
 
@@ -81,46 +102,29 @@ public class SlidersController {
         this.imageViewProperties(this.originalFrame, 400);
         this.imageViewProperties(this.maskImage, 200);
         this.imageViewProperties(this.morphImage, 200);
+        grabFrame();
+        this.cameraActive = true;
 
-        if (!this.cameraActive) {
-            // start the video capture
-            this.capture.open(0);
 
-            // is the video stream available?
-            if (this.capture.isOpened()) {
-                this.cameraActive = true;
+        // grab a frame every 33 ms (30 frames/sec)
+        Runnable frameGrabber = new Runnable() {
 
-                // grab a frame every 33 ms (30 frames/sec)
-                Runnable frameGrabber = new Runnable() {
-
-                    @Override
-                    public void run() {
-                        // effectively grab and process a single frame
-                        Mat frame = grabFrame();
-                        // convert and show the frame
-                        Image imageToShow = Utils.mat2Image(frame);
-                        updateImageView(originalFrame, imageToShow);
-                    }
-                };
-
-                this.timer = Executors.newSingleThreadScheduledExecutor();
-                this.timer.scheduleAtFixedRate(frameGrabber, 0, 33, TimeUnit.MILLISECONDS);
-
-                // update the button content
-                this.cameraButton.setText("Stop Camera");
-            } else {
-                // log the error
-                System.err.println("Failed to open the camera connection...");
+            @Override
+            public void run() {
+                // effectively grab and process a single frame
+                Mat frame = grabFrame();
+                // convert and show the frame
+                Image imageToShow = Utils.mat2Image(frame);
+                updateImageView(originalFrame, imageToShow);
             }
-        } else {
-            // the camera is not active at this point
-            this.cameraActive = false;
-            // update again the button content
-            this.cameraButton.setText("Start Camera");
+        };
 
-            // stop the timer
-            this.stopAcquisition();
-        }
+        this.timer = Executors.newSingleThreadScheduledExecutor();
+        this.timer.scheduleAtFixedRate(frameGrabber, 0, 200, TimeUnit.MILLISECONDS);
+
+
+        // update the button content
+        this.cameraButton.setText("Stop Camera");
     }
 
     /**
@@ -129,14 +133,9 @@ public class SlidersController {
      * @return the {@link Image} to show
      */
     private Mat grabFrame() {
-        Mat frame = new Mat();
+        Mat frame = image;
 
-        // check if the capture is open
-        if (this.capture.isOpened()) {
             try {
-                // read the current frame
-                this.capture.read(frame);
-
                 // if the frame is not empty, process it
                 if (!frame.empty()) {
                     // init
@@ -210,7 +209,6 @@ public class SlidersController {
                 System.err.print("Exception during the image elaboration...");
                 e.printStackTrace();
             }
-        }
 
         return frame;
     }
@@ -235,11 +233,9 @@ public class SlidersController {
      * Given a binary image containing one or more closed surfaces, use it as a
      * mask to find and highlight the objects contours
      *
-     * @param maskedImage
-     *            the binary image to be used as a mask
-     * @param frame
-     *            the original {@link Mat} image to be used for drawing the
-     *            objects contours
+     * @param maskedImage the binary image to be used as a mask
+     * @param frame       the original {@link Mat} image to be used for drawing the
+     *                    objects contours
      * @return the {@link Mat} image with the objects contours framed
      */
     private Mat findAndDrawBalls(Mat maskedImage, Mat frame) {
@@ -265,10 +261,8 @@ public class SlidersController {
      * Set typical {@link ImageView} properties: a fixed width and the
      * information to preserve the original image ration
      *
-     * @param image
-     *            the {@link ImageView} to use
-     * @param dimension
-     *            the width of the image to set
+     * @param image     the {@link ImageView} to use
+     * @param dimension the width of the image to set
      */
     private void imageViewProperties(ImageView image, int dimension) {
         // set a fixed width for the given ImageView
@@ -281,7 +275,7 @@ public class SlidersController {
      * Stop the acquisition from the camera and release all the resources
      */
     private void stopAcquisition() {
-        if (this.timer!=null && !this.timer.isShutdown()) {
+        if (this.timer != null && !this.timer.isShutdown()) {
             try {
                 // stop the timer
                 this.timer.shutdown();
@@ -301,10 +295,8 @@ public class SlidersController {
     /**
      * Update the {@link ImageView} in the JavaFX main thread
      *
-     * @param view
-     *            the {@link ImageView} to update
-     * @param image
-     *            the {@link Image} to show
+     * @param view  the {@link ImageView} to update
+     * @param image the {@link Image} to show
      */
     private void updateImageView(ImageView view, Image image) {
         Utils.onFXThread(view.imageProperty(), image);
