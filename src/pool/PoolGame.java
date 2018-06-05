@@ -44,9 +44,9 @@ public class PoolGame {
     }
 
     /**
-     *
-     * @param ballsPotted
-     * @param firstBallTouched
+     * Current player takes a turn
+     * @param ballsPotted a list of the potted ball colours, including white/black
+     * @param firstBallTouched colour of the first ball touched. If no balls are touched set to white
      */
     public void turn(ArrayList<BallTypes> ballsPotted, BallTypes firstBallTouched) {
         boolean hasFouled = false;
