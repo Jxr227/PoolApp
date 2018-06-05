@@ -153,26 +153,9 @@ public class SlidersController {
                     // get thresholding values from the UI
                     // remember: H ranges 0-180, S and V range 0-255
 
-                    //Values for colours
-                    Double defaultSaturation = 50.0;
-
-                    Double redValueStart = 0.0;
-                    Double redValueMax = 5.0;
-
-                    Double yellowValueStart = 25.0;
-                    Double yellowValueMax = 37.0;
-
-                    //Red
-                    //Scalar minValues = new Scalar(redValueStart, this.saturationStart.getValue(), this.valueStart.getValue());
-                    //Scalar maxValues = new Scalar(redValueMax, this.saturationStop.getValue(), this.valueStop.getValue());
-
-                    //Yellow
-                    Scalar minValues = new Scalar(yellowValueStart, defaultSaturation, this.valueStart.getValue());
-                    Scalar maxValues = new Scalar(yellowValueMax, this.saturationStop.getValue(), this.valueStop.getValue());
-
                     //Default
-                    //Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(), this.valueStart.getValue());
-                    //Scalar maxValues = new Scalar(this.hueStop.getValue(), this.saturationStop.getValue(), this.valueStop.getValue());
+                    Scalar minValues = new Scalar(getValues("default").start, this.saturationStart.getValue(), this.valueStart.getValue());
+                    Scalar maxValues = new Scalar(getValues("default").max, this.saturationStop.getValue(), this.valueStop.getValue());
 
                     // show the current selected HSV range
                     String valuesToPrint = "Hue range: " + minValues.val[0] + "-" + maxValues.val[0]
@@ -213,19 +196,39 @@ public class SlidersController {
         return frame;
     }
 
-    private static Double getValues(String colour) {
+    public class ColourRange{
+
+        Double start;
+        Double max;
+
+        public ColourRange(Double start, Double max){
+            this.start = start;
+            this.max = max;
+        }
+
+    }
+
+    private ColourRange getValues(String colour) {
+
+        //Values for colours
+        Double defaultSaturation = 50.0;
+
+        Double redValueStart = 0.0;
+        Double redValueMax = 5.0;
+
+        Double yellowValueStart = 25.0;
+        Double yellowValueMax = 37.0;
 
         switch (colour) {
             case "red":
-                return 0.0;
-                //5.0;
+                return new ColourRange(0.0,5.0);
             case "yellow":
-                return 25.0;
-                //37.0
-            case "black":
-                return 50.0;
+                return new ColourRange(25.0,37.0);
 
-            default: return 0.0;
+            case "black":
+                return new ColourRange(0.0,180.0);
+
+            default: return new ColourRange(0.0,180.0);
         }
     }
 
