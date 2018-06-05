@@ -45,6 +45,7 @@ public class Main extends Application {
     public static void main(String[] args)
     {
         // load the native OpenCV library
+        System.out.println("\n\n\n\n>>>>>>>>" +System.getProperty("java.library.path"));
         System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
 
         launch(args);
