@@ -50,7 +50,8 @@ public class PoolGame {
      */
     public void turn(ArrayList<BallTypes> ballsPotted, BallTypes firstBallTouched) {
         boolean hasFouled = false;
-        if(firstBallTouched != getTurn().getBallType()){
+        if(firstBallTouched != getTurn().getBallType() ||
+                (firstBallTouched == BallTypes.BLACK && getTurn().getScore() == 8)){
             hasFouled = true;
         }
         for (BallTypes ball : ballsPotted) {
