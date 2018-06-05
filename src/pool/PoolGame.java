@@ -43,8 +43,16 @@ public class PoolGame {
         return turns.peekFirst();
     }
 
-    public void turn(ArrayList<BallTypes> ballsPotted) {
+    /**
+     *
+     * @param ballsPotted
+     * @param firstBallTouched
+     */
+    public void turn(ArrayList<BallTypes> ballsPotted, BallTypes firstBallTouched) {
         boolean hasFouled = false;
+        if(firstBallTouched != getTurn().getBallType()){
+            hasFouled = true;
+        }
         for (BallTypes ball : ballsPotted) {
             if (getTurn().getBallType() == null) {
                 setBallTypes(getTurn(), ball);
@@ -68,7 +76,6 @@ public class PoolGame {
     }
 
     private void setBallTypes(PoolPlayer currPlayer, BallTypes pottedBall) {
-        BallTypes opponentsBall = pottedBall.getOpposite();
         if (currPlayer.equals(player1)) {
             setBallTypes(pottedBall, pottedBall.getOpposite());
         } else if (currPlayer.equals(player2)) {
