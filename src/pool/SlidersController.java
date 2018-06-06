@@ -176,10 +176,14 @@ public class SlidersController {
                     // show the partial output
                     this.updateImageView(this.maskImage, Utils.mat2Image(mask));
 
+                    //Dilate / erode values, helps make sensible sized ball in the mask
+                    Double dilateValue = 10.0;
+                    Double erodeValue = 5.0;
+
                     // morphological operators
                     // dilate with large element, erode with small ones
-                    Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(24, 24));
-                    Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_RECT, new Size(12, 12));
+                    Mat dilateElement = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(dilateValue, dilateValue));
+                    Mat erodeElement = Imgproc.getStructuringElement(Imgproc.MORPH_ELLIPSE, new Size(erodeValue, erodeValue));
 
                     Imgproc.erode(mask, morphOutput, erodeElement);
                     Imgproc.erode(morphOutput, morphOutput, erodeElement);
@@ -246,8 +250,8 @@ public class SlidersController {
 
             case "yellow":
 
-                ColourRange yellowHue = new ColourRange(25.0, 37.0);
-                ColourRange yellowSaturation = new ColourRange(75.0, 255.0);
+                ColourRange yellowHue = new ColourRange(20.0, 37.0);
+                ColourRange yellowSaturation = new ColourRange(90.0, 255.0);
                 ColourRange yellowValue = new ColourRange(0.0, 255.0);
 
                 return new HueSaturationValues(yellowHue, yellowSaturation, yellowValue);
