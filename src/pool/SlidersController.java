@@ -84,7 +84,7 @@ public class SlidersController {
         // HSV values for object detection
         BufferedImage img = null;
         try {
-            img = ImageIO.read(new File("res/pool.jpg"));
+            img = ImageIO.read(new File("res/pool2.jpeg"));
         } catch (IOException e) {
             System.out.println("EX");
         }
@@ -153,9 +153,17 @@ public class SlidersController {
                     // get thresholding values from the UI
                     // remember: H ranges 0-180, S and V range 0-255
 
-                    //Default
-                    Scalar minValues = new Scalar(getValues("default").start, this.saturationStart.getValue(), this.valueStart.getValue());
-                    Scalar maxValues = new Scalar(getValues("default").max, this.saturationStop.getValue(), this.valueStop.getValue());
+                    String colour = "yellow";
+
+                    HueSaturationValues values = getHueSaturationValues(colour);
+
+                    //Default values
+                    //Scalar minValues = new Scalar(this.hueStart.getValue(), this.saturationStart.getValue(), this.valueStart.getValue());
+                    //Scalar maxValues = new Scalar(this.hueStop.getValue(), this.saturationStop.getValue(), this.valueStop.getValue());
+
+                    //Setting hue saturation values for colour
+                    Scalar minValues = new Scalar(values.hue.start, values.saturation.start, values.value.start);
+                    Scalar maxValues = new Scalar(values.hue.max, values.saturation.max, values.value.max);
 
                     // show the current selected HSV range
                     String valuesToPrint = "Hue range: " + minValues.val[0] + "-" + maxValues.val[0]
@@ -196,7 +204,20 @@ public class SlidersController {
         return frame;
     }
 
-    public class ColourRange{
+    public class HueSaturationValues {
+
+        ColourRange hue;
+        ColourRange saturation;
+        ColourRange value;
+
+        public HueSaturationValues(ColourRange hue, ColourRange saturation, ColourRange value){
+            this.hue = hue;
+            this.saturation = saturation;
+            this.value = value;
+        }
+    }
+
+    public class ColourRange {
 
         Double start;
         Double max;
@@ -205,30 +226,45 @@ public class SlidersController {
             this.start = start;
             this.max = max;
         }
-
     }
 
-    private ColourRange getValues(String colour) {
+    private HueSaturationValues getHueSaturationValues(String colour) {
 
-        //Values for colours
-        Double defaultSaturation = 50.0;
-
-        Double redValueStart = 0.0;
-        Double redValueMax = 5.0;
-
-        Double yellowValueStart = 25.0;
-        Double yellowValueMax = 37.0;
+        //Defaults for ranges
+        ColourRange defaultHue = new ColourRange(25.0, 37.0);
+        ColourRange defaultSaturation = new ColourRange(75.0, 255.0);
+        ColourRange defaultValue = new ColourRange(0.0, 255.0);
 
         switch (colour) {
             case "red":
-                return new ColourRange(0.0,5.0);
+
+                ColourRange redHue = new ColourRange(0.0, 5.0);
+                ColourRange redSaturation = new ColourRange(75.0, 255.0);
+                ColourRange redValue = new ColourRange(0.0, 255.0);
+
+                return new HueSaturationValues(redHue,redSaturation, redValue);
+
             case "yellow":
-                return new ColourRange(25.0,37.0);
+
+                ColourRange yellowHue = new ColourRange(25.0, 37.0);
+                ColourRange yellowSaturation = new ColourRange(75.0, 255.0);
+                ColourRange yellowValue = new ColourRange(0.0, 255.0);
+
+                return new HueSaturationValues(yellowHue, yellowSaturation, yellowValue);
+
+            case "white":
+
+                ColourRange whiteHue = new ColourRange(0.0, 0.0);
+                ColourRange whiteSaturation = new ColourRange(0.0, 0.0);
+                ColourRange whiteValue = new ColourRange(0.0, 255.0);
+
+                return new HueSaturationValues(whiteHue, whiteSaturation, whiteValue);
 
             case "black":
-                return new ColourRange(0.0,180.0);
 
-            default: return new ColourRange(0.0,180.0);
+                return new HueSaturationValues(defaultHue, defaultSaturation, defaultValue);
+
+            default: return new HueSaturationValues(defaultHue, defaultSaturation, defaultValue);
         }
     }
 
